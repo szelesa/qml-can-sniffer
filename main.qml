@@ -3,6 +3,7 @@ import QtQuick.Window 2.3
 import QtQuick.VirtualKeyboard 2.2
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
+import Qt.labs.settings 1.0
 
 Window {
     id: window
@@ -248,6 +249,30 @@ Window {
                 anchors.topMargin: 8
                 model:ListModel{
                     id:tagListModel
+                    property string tagListJson
+                    function saveTagList(){
+                        var tags = [];
+                        for(var i = 0; i < count; i++){
+                            tags.push(get(i))
+                        }
+                        tagListJson = JSON.stringify(tags);
+                    }
+                    function loadTagList(){
+                        if(tagListJson !== ""){
+                            var tags = JSON.parse(tagListJson);
+                            clear();
+                            for(var i = 0; i < tags.length; i++){
+                                append(tags[i]);
+                            }
+                        }
+                    }
+                    onDataChanged: saveTagList()
+                    onRowsInserted: saveTagList()
+                    onRowsRemoved: saveTagList()
+                    Component.onCompleted: loadTagList()
+                }
+                Settings{
+                    property alias devices: tagListModel.tagListJson
                 }
 
                 delegate: Item{
